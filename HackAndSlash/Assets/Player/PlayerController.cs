@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
                     {
                         foreach (var item in stairCompo.waypoints)
                         {
-                            Vector3.AngleBetween()
+                            
                         }
                     }
                 }
