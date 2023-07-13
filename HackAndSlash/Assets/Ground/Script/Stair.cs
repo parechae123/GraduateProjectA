@@ -9,8 +9,8 @@ public class Stair : MonoBehaviour
     {
         if(TryGetComponent<Collider>(out Collider stairCC))
         {
-            waypoints[0] = stairCC.bounds.center;
-            waypoints[1] = stairCC.bounds.center;
+            waypoints[0] = stairCC.bounds.center-new Vector3(0,0,stairCC.bounds.extents.z);
+            waypoints[1] = stairCC.bounds.center - new Vector3(0, 0, stairCC.bounds.extents.z);
         }
 
     }
@@ -22,15 +22,15 @@ public class Stair : MonoBehaviour
         {
             tempWay = plrPosition.x;
             Mathf.Clamp(tempWay, waypoints[0].x, waypoints[1].x);
-            return new Vector3(tempWay,plrPosition.y,plrPosition.z);
+            return new Vector3(tempWay, plrPosition.y, waypoints[1].z);
         }
         else if (waypoints[0].z != waypoints[1].z)
         {
             tempWay = plrPosition.z;
             Mathf.Clamp(tempWay, waypoints[0].z, waypoints[1].z);
-            return new Vector3(plrPosition.x, plrPosition.y, tempWay);
+            return new Vector3(waypoints[1].x, plrPosition.y, tempWay);
         }
-        return plrPosition;
+        return Vector3.zero;
     }
     private void OnDrawGizmos()
     {

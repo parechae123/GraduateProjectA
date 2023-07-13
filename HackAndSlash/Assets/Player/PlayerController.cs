@@ -11,8 +11,9 @@ public class PlayerController : MonoBehaviour
     public Vector2 mousePos;
     private Rigidbody rb;
     private bool isMouseUIAttached;
-    private bool isMoveMentOrded = false;
+    public bool isMoveMentOrded = false;
     public Vector3 worldPos;
+    public Vector3 tempWorldPos;
     public RaycastHit groundHit;
     private Ray clickRay;
     private RaycastHit clickHit;
@@ -28,37 +29,48 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         isMouseUIAttached = EventSystem.current.IsPointerOverGameObject();
-        transform.position = Vector3.MoveTowards(transform.position,new Vector3(worldPos.x,transform.position.y,worldPos.z),moveSpeed*Time.deltaTime);
+        if (Physics.Raycast(transform.position + Vector3.up, transform.TransformDirection(Vector3.down), out groundHit, cc.bounds.size.y * 1010, groundLayer))
         {
-            if (Physics.Raycast(transform.position + Vector3.up, transform.TransformDirection(Vector3.down), out groundHit, cc.bounds.size.y * 1010, groundLayer))
+            transform.position = new Vector3(transform.position.x, groundHit.point.y + cc.bounds.extents.y, transform.position.z);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(worldPos.x, transform.position.y, worldPos.z), moveSpeed * Time.deltaTime);
+        }
+        if (isMoveMentOrded)
+        {
+            clickRay = Camera.main.ScreenPointToRay(mousePos);
+            if (Physics.Raycast(clickRay, out clickHit, Mathf.Infinity, groundLayer))
             {
-                transform.position = new Vector3(transform.position.x, groundHit.point.y + cc.bounds.extents.y, transform.position.z);
-            }
-            if (isMoveMentOrded)
-            {
-
-                if (transform.position.x == worldPos.x && transform.position.z == worldPos.z)
+                worldPos = clickHit.point;
+                if(clickHit.collider.gameObject.TryGetComponent<Stair>(out Stair strcompo))
                 {
-                    isMoveMentOrded = false;
+                    tempWorldPos = worldPos;
+                    worldPos = strcompo.GetStairWayPoint(clickHit.point);
+                    Debug.Log(strcompo.GetStairWayPoint(transform.position));
                 }
             }
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(worldPos.x, transform.position.y, worldPos.z), 2 * Time.deltaTime);
+        }
+        if (transform.position.x == worldPos.x && transform.position.z == worldPos.z)
+        {
+            if(tempWorldPos != Vector3.zero)
+            {
+                worldPos = tempWorldPos;
+                tempWorldPos= Vector3.zero;
+            }
+            isMoveMentOrded = false;
         }
     }
     public void OnClick(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (!isMouseUIAttached)
         {
-            if (!isMouseUIAttached)
+            if (ctx.performed)
             {
-                Debug.Log("UI¾È´ê¾Ò¾î");
-                clickRay = Camera.main.ScreenPointToRay(mousePos);
-                if(Physics.Raycast(clickRay, out clickHit, Mathf.Infinity, groundLayer))
-                {
-                    worldPos = clickHit.point;
-                    isMoveMentOrded = true;
-                }
+                isMoveMentOrded = true;
             }
+            else if (ctx.canceled)
+            {
+                isMoveMentOrded = false;
+            }
+
         }
     }
     public void OnQuaryMousePosition(InputAction.CallbackContext ctx)
