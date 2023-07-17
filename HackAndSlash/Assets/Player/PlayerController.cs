@@ -33,6 +33,7 @@ public class PlayerController : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, groundHit.point.y + cc.bounds.extents.y, transform.position.z);
             transform.position = Vector3.MoveTowards(transform.position, new Vector3(worldPos.x, transform.position.y, worldPos.z), moveSpeed * Time.deltaTime);
+
         }
         if (isMoveMentOrded)
         {
